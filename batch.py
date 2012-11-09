@@ -4,6 +4,9 @@ Various utilities for ontology creation and pattern matcher.
 
 """
 
+import os, time, shutil
+
+
 def read_stages(target_path, language):
     """Read the counts in target_path/language/ALL_STAGES.txt."""
     stages = {}
