@@ -38,3 +38,23 @@ def write_stages(target_path, language, stages):
     for stage, count in stages.items():
         fh.write("%s\t%d\n" % (stage, count))
     fh.close()
+
+def files_to_process(target_path, language, stages, stage, limit):
+    """Return a list of <year, filename> pairs from ALL_FILES.txt, using the stages in
+    ALL_STAGES.txt and the limit given."""
+    current_count = stages.setdefault(stage, 0)
+    files = open(os.path.join(target_path, language, 'ALL_FILES.txt'))
+    line_number = 0
+    while line_number < current_count:
+        files.readline(),
+        line_number += 1
+    files_read = 0
+    fnames = []
+    while files_read < limit:
+        fname = files.readline().strip()
+        basename = os.path.basename(fname)
+        dirname = os.path.dirname(fname)
+        year = os.path.split(dirname)[1]
+        fnames.append((year, basename))
+        files_read += 1
+    return fnames
