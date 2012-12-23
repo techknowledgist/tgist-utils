@@ -58,3 +58,30 @@ def files_to_process(target_path, language, stages, stage, limit):
         fnames.append((year, basename))
         files_read += 1
     return fnames
+
+
+def files_to_process2(target_path, language, stages, stage, limit):
+    """Return a list of <year, filename> pairs from ALL_FILES.txt, using the stages in
+    ALL_STAGES.txt and the limit given."""
+
+    # This is now more complicated. It includes (i) getting the data directory you are
+    # working on (eg en/tag), (ii) using the config-pipeline to find what subdirectory to
+    # use, (iii) reading the local stages file in there (which might now be called
+    # something like processing-dribble or what not)
+    
+    current_count = stages.setdefault(stage, 0)
+    files = open(os.path.join(target_path, language, 'config', 'files.txt'))
+    line_number = 0
+    while line_number < current_count:
+        files.readline(),
+        line_number += 1
+    files_read = 0
+    fnames = []
+    while files_read < limit:
+        fname = files.readline().strip()
+        basename = os.path.basename(fname)
+        dirname = os.path.dirname(fname)
+        year = os.path.split(dirname)[1]
+        fnames.append((year, basename))
+        files_read += 1
+    return fnames
