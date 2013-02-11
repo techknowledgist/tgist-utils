@@ -7,6 +7,71 @@ Various utilities for ontology creation and pattern matcher.
 import os, time, shutil
 
 
+def read_pipeline_config(pipeline_file):
+    pipeline = []
+    for line in open(pipeline_file):
+        if line.strip() == '':
+            continue
+        if line.strip()[0] == '#':
+            continue
+        split_line = line.strip().split()
+        step = split_line[0]
+        settings = {}
+        for feat_val in split_line[1:]:
+            feat, val = feat_val.strip().split('=')
+            settings[feat] = val
+        pipeline.append([step, settings])
+    return pipeline
+
+
+class GlobalConfig(object):
+
+    """Class that manages the configuration settings. This includes keeping track of the
+    language, the source directory or file, pipeline configuration settings etcetera."""
+    
+    def __init__(self, target_path, language, pipeline_config_file):
+        self.target_path = target_path
+        self.language = language
+        config_dir = os.path.join(target_path, language, 'config')
+        self.general_config_file = os.path.join(config_dir, 'general.txt')
+        self.pipeline_config_file = os.path.join(config_dir, pipeline_config_file)
+        self.filenames = os.path.join(config_dir, 'files.txt')
+        self.general = {}
+        self.pipeline = []
+        self.read_general_config()
+        self.read_pipeline_config()
+
+    def read_general_config(self):
+        for line in open(self.general_config_file):
+            (var, val) = line.strip().split('=')
+            self.general[var.strip()] = val.strip()
+        
+    def read_pipeline_config(self):
+        self.pipeline = read_pipeline_config(self.pipeline_config_file)
+
+    def source(self):
+        source = self.source_path()
+        return source if source is not None else self.source_file()
+ 
+    def source_path(self):
+        path = self.general['source_path']
+        return None if path == 'None' else path
+    
+    def source_file(self):
+        filename = self.general['source_file']
+        return None if filename == 'None' else filename
+
+    def pp(self):
+        print "\n<GlobalConfig on '%s/%s'>" % (self.target_path, self.language)
+        print "\n   General Config Settings"
+        for k,v in self.general.items():
+            print "      %s ==> %s" % (k,v)
+        print "\n   Pipeline Config Settings"
+        for k,v in self.pipeline:
+            print "      %s ==> %s" % (k,v)
+        print
+        
+        
 def read_stages(target_path, language):
     """Read the counts in target_path/language/ALL_STAGES.txt."""
     stages = {}
@@ -65,9 +130,9 @@ def files_to_process2(target_path, language, stages, stage, limit):
     ALL_STAGES.txt and the limit given."""
 
     # This is now more complicated. It includes (i) getting the data directory you are
-    # working on (eg en/tag), (ii) using the config-pipeline to find what subdirectory to
-    # use, (iii) reading the local stages file in there (which might now be called
-    # something like processing-dribble or what not)
+    # working on (eg en/tag), (ii) using the pipeline configuration to find what
+    # subdirectory to use, (iii) reading the local stages file in there (which might now
+    # be called something like processing-dribble or what not)
     
     current_count = stages.setdefault(stage, 0)
     files = open(os.path.join(target_path, language, 'config', 'files.txt'))
