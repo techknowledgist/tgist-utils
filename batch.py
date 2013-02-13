@@ -91,19 +91,18 @@ class DataSet(object):
     """
     Instance variables:
 
-       stage_name - name of the stage creating files in the data set
+       type -- name of the directory in 'data' where all files are
 
-       version_id - subdir in the output, None for the --populate stage (??)
+       version_id -- subdir in the output, None for the --populate stage (??)
 
-       output_name1 - name of the directory where files are created
+       stage_name -- name of the stage creating files in the data set
 
-       output_name2 - optional second directory for output files
+       output_name2 -- optional second directory for output files
 
-       global_config - global configuration settings handed over by the envirnoment, these
+       global_config -- global configuration settings handed over by the envirnoment, these
           do not necessary match anything in the dataset, in fact, checking whether the
           internals match the global config is the way to determine whether a data set is
           relevant for a particular pipeline.
-
           
     """
 
@@ -115,52 +114,38 @@ class DataSet(object):
                             " ".join(["%s=%s" % (k,v) for k,v in element[1].items()]))
         return "\n".join(elements).strip() + "\n"
     
-    
-    def __init__(self, stage_name, output_names, config, id='01'):
-        self.stage_name = stage_name
+
+    def __init__(self, stage_name, output_name, config, id='01'):
+        self.type = output_name
         self.version_id = id
-        self.output_name1 = output_names[0]
-        self.output_name2 = output_names[1] if len(output_names) > 1 else None
+        self.stage_name = stage_name
         self.files_processed = 0
         self.global_config = config
         self.local_config = None
         self.pipeline_head = None
         self.pipeline_trace = None
         self.base_path = os.path.join(config.target_path, config.language, 'data')
-        self.path1 = os.path.join(self.base_path, self.output_name1, self.version_id)
-        self.path2 = None
-        if self.output_name2 is not None:
-            self.path2 = os.path.join(self.base_path, self.output_name2, self.version_id)
+        self.path = os.path.join(self.base_path, self.type, self.version_id)
         if self.exists():
             self.load_from_disk()
 
-
     def __str__(self):
-        return "<DataSet on '%s' exists=%s processed=%d>" % (self.path1, self.exists(),
-                                                             self.files_processed)
+        return "<DataSet %s version_id=%s files=%d>" % \
+            (self.type, self.version_id, self.files_processed)
     
     def initialize_on_disk(self):
         """All that is guaranteed to exist is a directory like data/patents/en/d1_txt, but sub
         structures is not there. Create the substructure and initial versions of all
         needed files in configuration and state directories."""
         for subdir in ('config', 'state', 'files'):
-            ensure_path(os.path.join(self.path1, subdir))
-        if self.path2 is not None:
-            for subdir in ('config', 'state', 'files'):
-                ensure_path(os.path.join(self.path2, subdir))
-        create_file(os.path.join(self.path1, 'state', 'processed.txt'), "0\n")
-        create_file(os.path.join(self.path1, 'state', 'processing-history.txt'))
-        if self.path2 is not None:
-            create_file(os.path.join(self.path2, 'state', 'processed.txt'), "0\n")
-            create_file(os.path.join(self.path2, 'state', 'processing-history.txt'))
+            ensure_path(os.path.join(self.path, subdir))
+        create_file(os.path.join(self.path, 'state', 'processed.txt'), "0\n")
+        create_file(os.path.join(self.path, 'state', 'processing-history.txt'))
         trace, head = self.split_pipeline()
         trace_str = DataSet.pipeline_component_as_string(trace)
         head_str = DataSet.pipeline_component_as_string([head])
-        create_file(os.path.join(self.path1, 'config', 'pipeline-head.txt'), head_str)
-        create_file(os.path.join(self.path1, 'config', 'pipeline-trace.txt'), trace_str)
-        if self.path2 is not None:
-            create_file(os.path.join(self.path2, 'config', 'pipeline-head.txt'), head_str)
-            create_file(os.path.join(self.path2, 'config', 'pipeline-trace.txt'), trace_str)
+        create_file(os.path.join(self.path, 'config', 'pipeline-head.txt'), head_str)
+        create_file(os.path.join(self.path, 'config', 'pipeline-trace.txt'), trace_str)
         self.files_processed = 0
         
     def split_pipeline(self):
@@ -182,27 +167,26 @@ class DataSet(object):
         """Get the state and the local configuration from the disk. Does not need to get the
         processing history since all we need to do to it is to append that information
         from the latest processing step."""
-        fname1 = os.path.join(self.path1, 'state', 'processed.txt')
-        fname2 = os.path.join(self.path1, 'config', 'pipeline-head.txt')
-        fname3 = os.path.join(self.path1, 'config', 'pipeline-trace.txt')
+        fname1 = os.path.join(self.path, 'state', 'processed.txt')
+        fname2 = os.path.join(self.path, 'config', 'pipeline-head.txt')
+        fname3 = os.path.join(self.path, 'config', 'pipeline-trace.txt')
         self.pipeline_head = read_pipeline_config(fname2)[0]
         self.pipeline_trace = read_pipeline_config(fname3)
         self.files_processed = int(open(fname1).read().strip())
     
     def exists(self):
-        """Return True is the data set exists on disk, False otherwise."""
-        return os.path.exists(self.path1)
+        """Return True if the data set exists on disk, False otherwise."""
+        return os.path.exists(self.path)
 
     def update_state(self, limit, t1):
         """Update the content of state/processed.txt and state/processing-history.txt."""
         time_elapsed =  time.time() - t1
         processed = "%d\n" % self.files_processed
-        create_file(os.path.join(self.path1, 'state', 'processed.txt'), processed)
-        history_file = os.path.join(self.path1, 'state', 'processing-history.txt')
+        create_file(os.path.join(self.path, 'state', 'processed.txt'), processed)
+        history_file = os.path.join(self.path, 'state', 'processing-history.txt')
         fh = open(history_file, 'a')
         fh.write("%d\t%s\t%s\t%s\n" % (limit, time.strftime("%Y:%m:%d-%H:%M:%S"),
                                        get_git_commit(), time_elapsed))
-
 
     def input_matches_global_config(self):
         """This determines whether the data set matches the global pipeline configuration if the
@@ -215,7 +199,6 @@ class DataSet(object):
         #print 'gc_trace            -- ', gc_trace
         #print 'ds_trace_plus_head  -- ', ds_trace_plus_head
         return ds_trace_plus_head == gc_trace
-    
 
     def output_matches_global_config(self):
         """This determines whether the data set matches the global pipeline configuration if the
@@ -231,13 +214,10 @@ class DataSet(object):
         #print 'ds_trace_plus_head  -- ', ds_trace_plus_head
         return ds_trace_plus_head == gc_trace_plus_head
     
-    
     def pp(self):
         """Simplistic pretty print."""
         print "\n%s\n" % self
         print "   stage_name:",  self.stage_name
-        if self.path2 is not None:
-            print "    path2: %s" % self.path2
         print "   global_config.pipeline"
         for e in self.global_config.pipeline:
             print "     ", e[0], e[1]
@@ -247,8 +227,10 @@ class DataSet(object):
         for e in self.pipeline_trace:
             print "     ", e[0], e[1]
         print
-        
 
+
+# TODO: these should all be obsolete soon
+    
 def read_stages(target_path, language):
     """Read the counts in target_path/language/ALL_STAGES.txt."""
     stages = {}
@@ -300,7 +282,6 @@ def files_to_process(target_path, language, stages, stage, limit):
         fnames.append((year, basename))
         files_read += 1
     return fnames
-
 
 def files_to_process2(target_path, language, stages, stage, limit):
     """Return a list of <year, filename> pairs from ALL_FILES.txt, using the stages in
