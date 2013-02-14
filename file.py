@@ -6,8 +6,7 @@ def ensure_path(path, verbose=False):
     try:
         os.makedirs(path)
         if verbose:
-            # this only prints if there was no error in makedirs
-            print "[ensure_path] creating %s" % (path)
+            print "[ensure_path] created %s" % (path)
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
@@ -47,4 +46,16 @@ def create_file(filename, content=None):
     fh = open(filename, 'w')
     if content is not None:
         fh.write(content)
+    fh.close()
+
+def filename_generator(path, filelist):
+    """Creates genrator on the filelist, yielding the concatenation of the past and a path
+    in filelist."""
+    fh = open(filelist)
+    for filename in fh:
+        filename = filename.strip()
+        if filename.startswith('/'):
+            filename = filename[1:]
+        in_file = os.path.join(path, 'files', filename)
+        yield in_file
     fh.close()

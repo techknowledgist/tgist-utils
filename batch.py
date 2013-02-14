@@ -39,10 +39,10 @@ class GlobalConfig(object):
     def __init__(self, target_path, language, pipeline_config_file):
         self.target_path = target_path
         self.language = language
-        config_dir = os.path.join(target_path, language, 'config')
-        self.general_config_file = os.path.join(config_dir, 'general.txt')
-        self.pipeline_config_file = os.path.join(config_dir, pipeline_config_file)
-        self.filenames = os.path.join(config_dir, 'files.txt')
+        self.config_dir = os.path.join(target_path, language, 'config')
+        self.general_config_file = os.path.join(self.config_dir, 'general.txt')
+        self.pipeline_config_file = os.path.join(self.config_dir, pipeline_config_file)
+        self.filenames = os.path.join(self.config_dir, 'files.txt')
         self.general = {}
         self.pipeline = []
         self.read_general_config()
@@ -108,6 +108,7 @@ class DataSet(object):
 
     @classmethod
     def pipeline_component_as_string(cls, trace):
+        # TODO: make this a method on the maodule
         elements = []
         for element in trace:
             elements.append(element[0] + " " +
