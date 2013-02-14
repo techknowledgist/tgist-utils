@@ -11,6 +11,8 @@ from ontology.utils.git import get_git_commit
 
 
 def read_pipeline_config(pipeline_file):
+    """Parse pipeline_file and return a list with pipeline objects. Each pipeline object
+    is a pair of stage name and options dictionary."""
     pipeline = []
     for line in open(pipeline_file):
         if line.strip() == '':
@@ -29,6 +31,15 @@ def read_pipeline_config(pipeline_file):
             settings[feat] = val
         pipeline.append((step, settings))
     return pipeline
+
+
+def get_datasets(config, stage, input_name):
+    """Return a list with DataSet objects consisting of all datasets defined for a data
+    type."""
+    dirname = os.path.join(config.target_path, config.language, 'data', input_name)
+    datasets1 = [ds for ds in os.listdir(dirname) if ds.isdigit()]
+    datasets2 = [DataSet(stage, input_name, config, ds) for ds in datasets1]
+    return datasets2
 
 
 class GlobalConfig(object):

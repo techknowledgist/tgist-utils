@@ -54,8 +54,9 @@ def filename_generator(path, filelist):
     fh = open(filelist)
     for filename in fh:
         filename = filename.strip()
+        if not filename or filename.startswith('#'):
+            continue
         if filename.startswith('/'):
             filename = filename[1:]
-        in_file = os.path.join(path, 'files', filename)
-        yield in_file
+        yield os.path.join(path, 'files', filename)
     fh.close()
