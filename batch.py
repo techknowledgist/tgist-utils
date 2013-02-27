@@ -1,6 +1,6 @@
 """
 
-Various utilities for ontology creation and pattern matcher.
+Various utilities for ontology creation.
 
 """
 
@@ -32,6 +32,13 @@ def read_pipeline_config(pipeline_file):
         pipeline.append((step, settings))
     return pipeline
 
+def pipeline_component_as_string(pipeline_slice):
+    """Returns a string representation of a pipeline slice."""
+    elements = []
+    for element in pipeline_slice:
+        elements.append(element[0] + " " +
+                        " ".join(["%s=%s" % (k,v) for k,v in element[1].items()]))
+    return "\n".join(elements).strip() + "\n"
 
 def get_datasets(config, stage, input_name):
     """Return a list with DataSet objects consisting of all datasets defined for a data
@@ -101,31 +108,15 @@ class DataSet(object):
 
     """
     Instance variables:
-
        type -- name of the directory in 'data' where all files are
-
        version_id -- subdir in the output, None for the --populate stage (??)
-
        stage_name -- name of the stage creating files in the data set
-
        output_name2 -- optional second directory for output files
-
        global_config -- global configuration settings handed over by the envirnoment, these
           do not necessary match anything in the dataset, in fact, checking whether the
           internals match the global config is the way to determine whether a data set is
           relevant for a particular pipeline.
-          
     """
-
-    @classmethod
-    def pipeline_component_as_string(cls, trace):
-        # TODO: make this a method on the maodule
-        elements = []
-        for element in trace:
-            elements.append(element[0] + " " +
-                            " ".join(["%s=%s" % (k,v) for k,v in element[1].items()]))
-        return "\n".join(elements).strip() + "\n"
-    
 
     def __init__(self, stage_name, output_name, config, id='01'):
         self.type = output_name
@@ -154,8 +145,8 @@ class DataSet(object):
         create_file(os.path.join(self.path, 'state', 'processed.txt'), "0\n")
         create_file(os.path.join(self.path, 'state', 'processing-history.txt'))
         trace, head = self.split_pipeline()
-        trace_str = DataSet.pipeline_component_as_string(trace)
-        head_str = DataSet.pipeline_component_as_string([head])
+        trace_str = pipeline_component_as_string(trace)
+        head_str = pipeline_component_as_string([head])
         create_file(os.path.join(self.path, 'config', 'pipeline-head.txt'), head_str)
         create_file(os.path.join(self.path, 'config', 'pipeline-trace.txt'), trace_str)
         self.files_processed = 0
@@ -192,6 +183,8 @@ class DataSet(object):
 
     def update_state(self, limit, t1):
         """Update the content of state/processed.txt and state/processing-history.txt."""
+        # TODO: should not just print the files processed in the history, but also the
+        # range of files.
         time_elapsed =  time.time() - t1
         processed = "%d\n" % self.files_processed
         create_file(os.path.join(self.path, 'state', 'processed.txt'), processed)
@@ -239,84 +232,3 @@ class DataSet(object):
         for e in self.pipeline_trace:
             print "     ", e[0], e[1]
         print
-
-
-# TODO: these should all be obsolete soon
-    
-def read_stages(target_path, language):
-    """Read the counts in target_path/language/ALL_STAGES.txt."""
-    stages = {}
-    for line in open(os.path.join(target_path, language, 'ALL_STAGES.txt')):
-        if not line.strip():
-            continue
-        (stage, count) = line.strip().split("\t")
-        stages[stage] = int(count)
-    return stages
-
-def update_stages(target_path, language, stage, limit):
-    """Updates the counts in target_path/language/ALL_STAGES.txt. This includes rereading
-    the file because during processing on one machine another machine could have done some
-    other processing and have updated the fiel, we do not want to lose those updates. This
-    could potentially go wrong when two separate processes terminate at the same time, a
-    rather unlikely occurrence."""
-    stages = read_stages(target_path, language)
-    stages.setdefault(stage, 0)
-    stages[stage] += limit
-    write_stages(target_path, language, stages)
-    
-def write_stages(target_path, language, stages):
-    """Write stages counts to target_path/language/ALL_STAGES.txt."""
-    stages_file = os.path.join(target_path, language, 'ALL_STAGES.txt')
-    backup_file = os.path.join(target_path, language,
-                               "ALL_STAGES.%s.txt" % time.strftime("%Y%m%d-%H%M%S"))
-    shutil.copyfile(stages_file, backup_file)
-    fh = open(stages_file, 'w')
-    for stage, count in stages.items():
-        fh.write("%s\t%d\n" % (stage, count))
-    fh.close()
-
-def files_to_process(target_path, language, stages, stage, limit):
-    """Return a list of <year, filename> pairs from ALL_FILES.txt, using the stages in
-    ALL_STAGES.txt and the limit given."""
-    current_count = stages.setdefault(stage, 0)
-    files = open(os.path.join(target_path, language, 'ALL_FILES.txt'))
-    line_number = 0
-    while line_number < current_count:
-        files.readline(),
-        line_number += 1
-    files_read = 0
-    fnames = []
-    while files_read < limit:
-        fname = files.readline().strip()
-        basename = os.path.basename(fname)
-        dirname = os.path.dirname(fname)
-        year = os.path.split(dirname)[1]
-        fnames.append((year, basename))
-        files_read += 1
-    return fnames
-
-def files_to_process2(target_path, language, stages, stage, limit):
-    """Return a list of <year, filename> pairs from ALL_FILES.txt, using the stages in
-    ALL_STAGES.txt and the limit given."""
-
-    # This is now more complicated. It includes (i) getting the data directory you are
-    # working on (eg en/tag), (ii) using the pipeline configuration to find what
-    # subdirectory to use, (iii) reading the local stages file in there (which might now
-    # be called something like processing-dribble or what not)
-    
-    current_count = stages.setdefault(stage, 0)
-    files = open(os.path.join(target_path, language, 'config', 'files.txt'))
-    line_number = 0
-    while line_number < current_count:
-        files.readline(),
-        line_number += 1
-    files_read = 0
-    fnames = []
-    while files_read < limit:
-        fname = files.readline().strip()
-        basename = os.path.basename(fname)
-        dirname = os.path.dirname(fname)
-        year = os.path.split(dirname)[1]
-        fnames.append((year, basename))
-        files_read += 1
-    return fnames
