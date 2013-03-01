@@ -108,14 +108,21 @@ class DataSet(object):
 
     """
     Instance variables:
+
        type -- name of the directory in 'data' where all files are
+
        version_id -- subdir in the output, None for the --populate stage (??)
-       stage_name -- name of the stage creating files in the data set
+
+       stage_name -- name of the stage creating files in the data set, this name is not
+          always specified and can be None, but it will always be set when a DataSet is
+          created in the context of a processing stage.
+
        output_name2 -- optional second directory for output files
-       global_config -- global configuration settings handed over by the envirnoment, these
-          do not necessary match anything in the dataset, in fact, checking whether the
-          internals match the global config is the way to determine whether a data set is
-          relevant for a particular pipeline.
+
+       global_config -- global configuration settings handed over by the envirnoment,
+          these do not necessary match anything in the dataset, in fact, checking whether
+          the internals match the global config is the way to determine whether a data set
+          is relevant for a particular pipeline.
     """
 
     def __init__(self, stage_name, output_name, config, id='01'):
@@ -137,8 +144,8 @@ class DataSet(object):
             (self.type, self.version_id, self.files_processed)
     
     def initialize_on_disk(self):
-        """All that is guaranteed to exist is a directory like data/patents/en/d1_txt, but sub
-        structures is not there. Create the substructure and initial versions of all
+        """All that is guaranteed to exist is a directory like data/patents/en/d1_txt, but
+        sub structures is not there. Create the substructure and initial versions of all
         needed files in configuration and state directories."""
         for subdir in ('config', 'state', 'files'):
             ensure_path(os.path.join(self.path, subdir))
@@ -152,8 +159,8 @@ class DataSet(object):
         self.files_processed = 0
         
     def split_pipeline(self):
-        """Return a pair of pipeline trace and pipeline head from the config.pipeline given the
-        current processing step in self.stage_name."""
+        """Return a pair of pipeline trace and pipeline head from the config.pipeline
+        given the current processing step in self.stage_name."""
         trace = []
         for step in self.global_config.pipeline:
             if step[0] == self.stage_name:
@@ -194,8 +201,8 @@ class DataSet(object):
                                        get_git_commit(), time_elapsed))
 
     def input_matches_global_config(self):
-        """This determines whether the data set matches the global pipeline configuration if the
-        data set is considered to be the input to the current processing step. This
+        """This determines whether the data set matches the global pipeline configuration
+        if the data set is considered to be the input to the current processing step. This
         amounts to checking whether match dataset.trace + dataset.head is equal to
         global_config.pipeline(txt).trace."""
         gc_trace, gc_head = self.split_pipeline()
@@ -206,10 +213,10 @@ class DataSet(object):
         return ds_trace_plus_head == gc_trace
 
     def output_matches_global_config(self):
-        """This determines whether the data set matches the global pipeline configuration if the
-        data set is considered to be the output to the current processing step. This
-        amounts to checking whether match dataset.trace + dataset.head is equal to
-        global_config.pipeline(txt).trace."""
+        """This determines whether the data set matches the global pipeline configuration
+        if the data set is considered to be the output to the current processing
+        step. This amounts to checking whether match dataset.trace + dataset.head is equal
+        to global_config.pipeline(txt).trace."""
         gc_trace, gc_head = self.split_pipeline()
         gc_trace_plus_head = gc_trace
         gc_trace_plus_head.append(gc_head)
