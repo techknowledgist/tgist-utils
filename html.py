@@ -25,18 +25,22 @@ Typically, you will use one of the convenience functions on HtmlDocument:
    add_list
    add_numbered_list
    add_text
+   add_link
    add_table
 
-The last one is special in the sense that it returns an HtmlTable object which
-itself understands the add_row() method.
+All these methods add elements sequentially to the body tag, the only excdption
+is the add_styles() method, which always adds to a styes list on the head
+element. The add_table() is special in the sense that it returns an HtmlTable
+object which itself understands the add_row() method.
 
 A few more examples:
 
-   >>> doc.add_header(None, "An h2 tag without a style")
+   >>> doc.add_header(None, 'An h2 tag without a style')
    >>> doc.add_text('<p>raw text with <strong>tags</strong> in it</p>')
-   >>> doc.add_paragraph('large', "A p tag with a class")
-   >>> doc.add_paragraph(None, "A p tag without a class")
+   >>> doc.add_paragraph('large', 'A p tag with a class')
+   >>> doc.add_paragraph(None, 'A p tag without a class')
    >>> doc.add_empty('hr')
+   >>> doc.add_link('http://127.0.0.1', 'link to localhost')
    >>> doc.add_list(['a', 'ul', 'list', 'with', 'six', 'items'])
    >>> table = doc.add_table(class_name='indent', padding=8)
    >>> table.add_row(('&nbsp;',), ('term',), ('score',), ('documents',))
@@ -45,11 +49,10 @@ A few more examples:
 
 
 SOME THINGS ON THE WISHLIST:
-- add convenience method for anchor tags
 - allow writing arbitrary stuff to the head element
 - use a StyleSheet object
-- add a comment object
-- add attribute support to some of the convenience methods
+- add a comment method and object
+- some of the convenience methods do not have  attribute support
 
 """
 
@@ -125,7 +128,7 @@ class HtmlDocument(HtmlElement):
         for item in items:
             ul.add(HtmlSimpleElement('li', None, item))
 
-    def add__numbered_list(self, items):
+    def add_numbered_list(self, items):
         ul = doc.add(HtmlElement(doc, 'ul'))
         for item in items:
             ul.add(HtmlSimpleElement('li', None, item))
@@ -133,6 +136,10 @@ class HtmlDocument(HtmlElement):
     def add_text(self, text):
         """Add text or raw html code to the body element."""
         self.children.append(HtmlText(text))
+
+    def add_link(self, url, text):
+        """Add an <a> tag with href and text."""
+        self.children.append(HtmlLink(url, text))
 
     def print_html(self, fh, indent=''):
         """Print the html document to the file handle."""
@@ -159,7 +166,6 @@ class HtmlDocument(HtmlElement):
 
 
 class HtmlSimpleElement(HtmlElement):
-
     def __init__(self, tagname, class_name, text):
         self.tag = tagname
         self.class_name = class_name
@@ -167,14 +173,19 @@ class HtmlSimpleElement(HtmlElement):
         self.children = [HtmlText(text)]
 
 class HtmlEmptyElement(HtmlElement):
-
     def __init__(self, tag):
         self.tag = tag
         self.class_name = None
         self.attrs = {}
-
     def print_html(self, fh, indent=''):
         fh.write("%s<%s/>\n" % (indent, self.tag))
+
+class HtmlLink(HtmlElement):
+    def __init__(self, url, text):
+        self.url = url
+        self.text = text
+    def print_html(self, fh, indent=''):
+        fh.write("%s<a href='%s'>%s</a>\n" % (indent, self.url, self.text))
 
 
 class HtmlText(HtmlElement):
@@ -230,7 +241,7 @@ if __name__ == '__main__':
     doc.add_paragraph('large', "A p tag with a class")
     doc.add_paragraph(None, "A p tag without a class")
     doc.add_empty('hr')
-
+    doc.add_link("http://127.0.0.1", "link to local host")
     doc.add_paragraph(None, "time for a list")
     doc.add_list(['a', 'ul', 'list', 'with', 'six', 'items'])
 
