@@ -12,10 +12,10 @@ def ensure_path(path, verbose=False):
             raise
 
 def get_lines(filename, start=0, limit=500):
-    """Return a list with n=limit lines from filename, starting from line n=start. This
-    function will return less than n=limit files if their were less than n=limit lines
-    left in filename, it will return an empty list if ==start is larger than the number of
-    lines in the file.""" 
+    """Return a list with n=limit file specifications from filename, starting
+    from line n=start. This function will return less than n=limit files if
+    their were less than n=limit lines left in filename, it will return an empty
+    list if start is larger than the number of lines in the file."""
     current_count = start
     fh = open(filename)
     line_number = 0
@@ -23,15 +23,16 @@ def get_lines(filename, start=0, limit=500):
         fh.readline(),
         line_number += 1
     lines_read = 0
-    lines = []
+    fspecs = []
     while lines_read < limit:
         line = fh.readline().strip()
         if line == '':
             break
-        lines.append(line)
+        fspec = FileSpec(line)
+        fspecs.append(fspec)
         lines_read += 1
     fh.close()
-    return lines
+    return fspecs
 
 def get_file_paths(source_path):
     """Return a list with all filenames in source_path."""
@@ -60,3 +61,33 @@ def filename_generator(path, filelist):
             filename = filename[1:]
         yield os.path.join(path, 'files', filename)
     fh.close()
+
+
+class FileSpec(object):
+
+    """A FileSpec is created from a line from a file that specifies the
+    sources. Such a file has two mandatory columns: year and source_file. These
+    fill the year and source instance variables in the FileSpec. The target
+    instance variable is by default the same as the source, but can be overruled
+    if there is a third column in the file. Example input lines:
+
+       1980    /data/patents/xml/us/1980/12.xml   1980/12.xml
+       1980    /data/patents/xml/us/1980/13.xml   1980/13.xml
+       1980    /data/patents/xml/us/1980/14.xml
+       0000    /data/patents/xml/us/1980/15.xml
+
+    """
+
+    def __init__(self, line):
+        fields = line.strip().split("\t")
+        self.year = fields[0]
+        self.source = fields[1]
+        self.target = fields[2] if len(fields) > 2 else fields[1]
+        self._strip_slashes()
+
+    def __str__(self):
+        return "%s\n  %s\n  %s" % (self.year, self.source, self.target)
+
+    def _strip_slashes(self):
+        if self.target.startswith(os.sep):
+            self.target = self.target[1:]
