@@ -50,16 +50,15 @@ def create_file(filename, content=None):
     fh.close()
 
 def filename_generator(path, filelist):
-    """Creates genrator on the filelist, yielding the concatenation of the past and a path
+    """Creates generator on the filelist, yielding the concatenation of the past and a path
     in filelist."""
     fh = open(filelist)
-    for filename in fh:
-        filename = filename.strip()
-        if not filename or filename.startswith('#'):
+    for line in fh:
+        line = line.strip()
+        if not line or line.startswith('#'):
             continue
-        if filename.startswith('/'):
-            filename = filename[1:]
-        yield os.path.join(path, 'files', filename)
+        fspec = FileSpec(line)
+        yield os.path.join(path, 'files', fspec.target)
     fh.close()
 
 
