@@ -43,7 +43,7 @@ def pipeline_component_as_string(pipeline_slice):
 def get_datasets(config, stage, input_name):
     """Return a list with DataSet objects consisting of all datasets defined for a data
     type."""
-    dirname = os.path.join(config.target_path, config.language, 'data', input_name)
+    dirname = os.path.join(config.target_path, 'data', input_name)
     datasets1 = [ds for ds in os.listdir(dirname) if ds.isdigit()]
     datasets2 = [DataSet(stage, input_name, config, ds) for ds in datasets1]
     return datasets2
@@ -57,7 +57,7 @@ class GlobalConfig(object):
     def __init__(self, target_path, language, pipeline_config_file):
         self.target_path = target_path
         self.language = language
-        self.config_dir = os.path.join(target_path, language, 'config')
+        self.config_dir = os.path.join(target_path, 'config')
         self.general_config_file = os.path.join(self.config_dir, 'general.txt')
         self.pipeline_config_file = os.path.join(self.config_dir, pipeline_config_file)
         self.filenames = os.path.join(self.config_dir, 'files.txt')
@@ -94,7 +94,7 @@ class GlobalConfig(object):
         return {}
                 
     def pp(self):
-        print "\n<GlobalConfig on '%s/%s'>" % (self.target_path, self.language)
+        print "\n<GlobalConfig on '%s'>" % (self.target_path)
         print "\n   General Config Settings"
         for k,v in self.general.items():
             print "      %s ==> %s" % (k,v)
@@ -109,21 +109,25 @@ class DataSet(object):
     """
     Instance variables:
 
-       type -- name of the directory in 'data' where all files are
+       type:
+          name of the directory in 'data' where all files are
 
-       version_id -- subdir in the output, None for the --populate stage (??)
+       version_id:
+           subdir in the output, None for the --populate stage (??)
 
-       stage_name -- name of the stage creating files in the data set, this name is not
-          always specified and can be None, but it will always be set when a DataSet is
-          created in the context of a processing stage.
+       stage_name:
+          name of the stage creating files in the data set, this name is not
+          always specified and can be None, but it will always be set when a
+          DataSet is created in the context of a processing stage.
 
-       output_name2 -- optional second directory for output files
+       output_name2:
+          optional second directory for output files
 
-       global_config -- global configuration settings handed over by the envirnoment,
-          these do not necessary match anything in the dataset, in fact, checking whether
-          the internals match the global config is the way to determine whether a data set
-          is relevant for a particular pipeline.
-    """
+       global_config: global configuration settings handed over by the
+          environment, these do not necessary match anything in the dataset, in
+          fact, checking whether the internals match the global config is the
+          way to determine whether a data set is relevant for a particular
+          pipeline.  """
 
     def __init__(self, stage_name, output_name, config, id='01'):
         self.type = output_name
@@ -134,7 +138,7 @@ class DataSet(object):
         self.local_config = None
         self.pipeline_head = None
         self.pipeline_trace = None
-        self.base_path = os.path.join(config.target_path, config.language, 'data')
+        self.base_path = os.path.join(config.target_path, 'data')
         self.path = os.path.join(self.base_path, self.type, self.version_id)
         if self.exists():
             self.load_from_disk()
