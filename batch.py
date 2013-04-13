@@ -48,6 +48,33 @@ def get_datasets(config, stage, input_name):
     datasets2 = [DataSet(stage, input_name, config, ds) for ds in datasets1]
     return datasets2
 
+def show_datasets(rconfig, data_types):
+    """Print all datasets in the data directory."""
+    for dataset_type in data_types:
+        print "\n===", dataset_type, "===\n"
+        path = os.path.join(rconfig.target_path, 'data', dataset_type)
+        datasets1 = [ds for ds in os.listdir(path) if ds.isdigit()]
+        datasets2 = [DataSet(None, dataset_type, rconfig, ds) for ds in datasets1]
+        for ds in datasets2:
+            print ds
+            for e in ds.pipeline_trace:
+                print "   ", e[0], e[1]
+            print "   ", ds.pipeline_head[0], ds.pipeline_head[1]
+
+def show_pipelines(rconfig):
+    path = os.path.join(rconfig.target_path, 'config')
+    pipeline_files = [f for f in os.listdir(path) if f.startswith('pipeline')]
+    for pipeline_file in sorted(pipeline_files):
+        if pipeline_file[-1] == '~':
+            continue
+        print "\n[%s]" % pipeline_file
+        for line in open(os.path.join(path, pipeline_file)).readlines():
+            line = line.strip()
+            if not line or line[0] == '#':
+                continue
+            print '  ', line
+    print
+
 
 class RuntimeConfig(object):
 
