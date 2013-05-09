@@ -1,4 +1,9 @@
-import os, errno
+import os, errno, stat
+
+
+def read_only(filename):
+    """Set permissions on filename to read only."""
+    os.chmod(filename, stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
 
 
 def ensure_path(path, verbose=False):
