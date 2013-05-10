@@ -98,7 +98,9 @@ class RuntimeConfig(object):
         for line in open(self.general_config_file):
             (var, val) = line.strip().split('=')
             self.general[var.strip()] = val.strip()
-        
+            if var.strip() == 'language':
+                self.language = val.strip()
+
     def read_pipeline_config(self):
         self.pipeline = read_pipeline_config(self.pipeline_config_file)
 
@@ -120,7 +122,7 @@ class RuntimeConfig(object):
                 return step[1]
         print "[get_options] WARNING: processing stage not found"
         return {}
-                
+
     def pp(self):
         print "\n<GlobalConfig on '%s'>" % (self.target_path)
         print "\n   General Config Settings"

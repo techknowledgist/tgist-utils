@@ -80,13 +80,22 @@ class FileSpec(object):
        1980    /data/patents/xml/us/1980/14.xml
        0000    /data/patents/xml/us/1980/15.xml
 
+    FileSpec can also be created from a line with just one filed, in that case
+    the year and source are set to None and the target to the only field. This
+    is typically used for files that simply list filenames for testing or
+    training.
     """
 
     def __init__(self, line):
         fields = line.strip().split("\t")
-        self.year = fields[0]
-        self.source = fields[1]
-        self.target = fields[2] if len(fields) > 2 else fields[1]
+        if len(fields) > 1:
+            self.year = fields[0]
+            self.source = fields[1]
+            self.target = fields[2] if len(fields) > 2 else fields[1]
+        else:
+            self.year = None
+            self.source = None
+            self.target = fields[0]
         self._strip_slashes()
 
     def __str__(self):
