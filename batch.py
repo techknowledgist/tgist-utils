@@ -6,7 +6,7 @@ Various utilities for ontology creation.
 
 import os, time, shutil
 
-from ontology.utils.file import ensure_path, get_lines, create_file
+from ontology.utils.file import filename_generator, ensure_path, get_lines, create_file
 from ontology.utils.git import get_git_commit
 
 
@@ -74,6 +74,58 @@ def show_pipelines(rconfig):
                 continue
             print '  ', line
     print
+
+
+def find_input_dataset(rconfig, dataset_name):
+    """Find the dataset that is input for training. Unlike the code in
+    step2_document_processing.find_input_dataset(), this function hard-codes the
+    input data type rather than referring to DOCUMENT_PROCESSING_IO. Note that
+    this particular one was only used for generating the summary files, it is
+    currently not used as input to training. This method probably only works for
+    dataset_names d3_phr_feats, d3_phr_occ and d4_doc_feats"""
+    # TODO: this is part of the find_input_dataset() mess
+    datasets = []
+    for ds in get_datasets(rconfig, '--train', dataset_name):
+        full_config = ds.pipeline_trace
+        full_config.append(ds.pipeline_head)
+        # for d3_phr_feats and d3_phr_occ we do not need to apply the entire
+        # pipeline, therefore matching should not be on the entire pipeline
+        # either
+        pipeline = rconfig.pipeline
+        if dataset_name.startswith('d3_'):
+            pipeline = rconfig.pipeline[:-1]
+        if full_config == pipeline:
+            datasets.append(ds)
+    return _check_result(datasets)
+
+def _check_result(datasets):
+    """Return the dataset if there is only one in the list, otherwise write a warning and
+    exit."""
+    if len(datasets) == 1:
+        return datasets[0]
+    elif len(datasets) > 1:
+        print "WARNING, more than one approriate training set:"
+        for ds in datasets:
+            print '  ', ds
+        sys.exit("Exiting...")
+    elif len(datasets) == 0:
+        print "WARNING: no datasets available to meet input requirements"
+        sys.exit("Exiting...")
+
+def check_file_availability(dataset, filelist):
+    """Check whether all files in filelist have been processed and are available in
+    dataset. If not, print a warning and exit."""
+    file_generator = filename_generator(dataset.path, filelist)
+    total = 0
+    not_in_dataset = 0
+    for fname in file_generator:
+        total += 1
+        if not os.path.exists(fname):
+            not_in_dataset += 1
+    if not_in_dataset > 0:
+        sys.exit("WARNING: %d/%d files in %s have not been processed yet\n         %s" %
+                 (not_in_dataset, total, os.path.basename(filelist), dataset))
+
 
 
 class RuntimeConfig(object):
