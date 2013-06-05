@@ -4,7 +4,7 @@ Various utilities for ontology creation.
 
 """
 
-import os, time, shutil
+import os, sys, time, shutil
 
 from ontology.utils.file import filename_generator, ensure_path, get_lines, create_file
 from ontology.utils.git import get_git_commit
@@ -48,18 +48,20 @@ def get_datasets(config, stage, input_name):
     datasets2 = [DataSet(stage, input_name, config, ds) for ds in datasets1]
     return datasets2
 
-def show_datasets(rconfig, data_types):
+def show_datasets(rconfig, data_types, verbose=False):
     """Print all datasets in the data directory."""
     for dataset_type in data_types:
-        print "\n===", dataset_type, "===\n"
+        if verbose:
+            print "\n===", dataset_type, "===\n"
         path = os.path.join(rconfig.target_path, 'data', dataset_type)
         datasets1 = [ds for ds in os.listdir(path) if ds.isdigit()]
         datasets2 = [DataSet(None, dataset_type, rconfig, ds) for ds in datasets1]
         for ds in datasets2:
             print ds
-            for e in ds.pipeline_trace:
-                print "   ", e[0], e[1]
-            print "   ", ds.pipeline_head[0], ds.pipeline_head[1]
+            if verbose:
+                for e in ds.pipeline_trace:
+                    print "   ", e[0], e[1]
+                print "   ", ds.pipeline_head[0], ds.pipeline_head[1]
 
 def show_pipelines(rconfig):
     path = os.path.join(rconfig.target_path, 'config')
