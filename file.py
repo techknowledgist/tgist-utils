@@ -55,8 +55,8 @@ def create_file(filename, content=None):
     fh.close()
 
 def filename_generator(path, filelist):
-    """Creates generator on the filelist, yielding the concatenation of the past and a path
-    in filelist."""
+    """Creates generator on the filelist, yielding the concatenation of the path
+    and a path in filelist."""
     fh = open(filelist)
     for line in fh:
         line = line.strip()
@@ -80,7 +80,7 @@ class FileSpec(object):
        1980    /data/patents/xml/us/1980/14.xml
        0000    /data/patents/xml/us/1980/15.xml
 
-    FileSpec can also be created from a line with just one filed, in that case
+    FileSpec can also be created from a line with just one field, in that case
     the year and source are set to None and the target to the only field. This
     is typically used for files that simply list filenames for testing or
     training.

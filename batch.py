@@ -6,7 +6,7 @@ Various utilities for ontology creation.
 
 import os, sys, time, shutil
 
-from ontology.utils.file import filename_generator, ensure_path, get_lines, create_file
+from ontology.utils.file import filename_generator, ensure_path, create_file
 from ontology.utils.git import get_git_commit
 
 
