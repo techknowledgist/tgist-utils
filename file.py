@@ -1,4 +1,4 @@
-import os, errno, stat
+import os, errno, stat, subprocess
 
 
 def read_only(filename):
@@ -65,6 +65,22 @@ def filename_generator(path, filelist):
         fspec = FileSpec(line)
         yield os.path.join(path, 'files', fspec.target)
     fh.close()
+
+def compress(*fnames):
+    """Compress all filenames fname in *fnames using gzip. Checks first if the
+    filename exists, it it doesn't it will assume that a file fname.gz already
+    exists and it will not attempt to compress."""
+    for fname in fnames:
+        if not os.path.exists(fname + '.gz'):
+            subprocess.call(['gzip', fname])
+
+def uncompress(*fnames):
+    """Uncompress all files fname in *fnames using gunzip. The fname argument
+    does not include the .gz extension, it is added by this function. If a file
+    fname already exists, the function will not attempt to uncompress."""
+    for fname in fnames:
+        if not os.path.exists(fname):
+            subprocess.call(['gunzip', fname + '.gz'])
 
 
 class FileSpec(object):

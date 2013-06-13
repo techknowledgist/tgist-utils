@@ -285,8 +285,9 @@ class DataSet(object):
         create_file(os.path.join(self.path, 'state', 'processed.txt'), processed)
         history_file = os.path.join(self.path, 'state', 'processing-history.txt')
         fh = open(history_file, 'a')
-        fh.write("%d\t%s\t%s\t%s\n" % (limit, time.strftime("%Y:%m:%d-%H:%M:%S"),
-                                       get_git_commit(), time_elapsed))
+        fh.write("%s\t%d\t%s\t%s\t%s\n" % (self.stage_name, limit,
+                                           time.strftime("%Y:%m:%d-%H:%M:%S"),
+                                           get_git_commit(), time_elapsed))
 
     def input_matches_global_config(self):
         """This determines whether the data set matches the global pipeline configuration
