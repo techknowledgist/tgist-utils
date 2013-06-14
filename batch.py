@@ -115,14 +115,15 @@ def _check_result(datasets):
         sys.exit("Exiting...")
 
 def check_file_availability(dataset, filelist):
-    """Check whether all files in filelist have been processed and are available in
-    dataset. If not, print a warning and exit."""
+    """Check whether all files in filelist are available in dataset. If not,
+    print a warning and exit. This method allows for possibility that the file
+    was compressed."""
     file_generator = filename_generator(dataset.path, filelist)
     total = 0
     not_in_dataset = 0
     for fname in file_generator:
         total += 1
-        if not os.path.exists(fname):
+        if not os.path.exists(fname) and not os.path.exists(fname+'.gz'):
             not_in_dataset += 1
     if not_in_dataset > 0:
         sys.exit("WARNING: %d/%d files in %s have not been processed yet\n         %s" %
