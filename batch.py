@@ -94,8 +94,9 @@ def find_input_dataset(rconfig, dataset_name):
         # pipeline, therefore matching should not be on the entire pipeline
         # either
         pipeline = rconfig.pipeline
-        if dataset_name.startswith('d3_'):
-            pipeline = rconfig.pipeline[:-1]
+        # TODO: this is now an even bigger mess
+        #if dataset_name.startswith('d3_'):
+        #    pipeline = rconfig.pipeline[:-1]
         if full_config == pipeline:
             datasets.append(ds)
     return _check_result(datasets)

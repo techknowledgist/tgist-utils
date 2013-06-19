@@ -82,6 +82,18 @@ def uncompress(*fnames):
         if not os.path.exists(fname):
             subprocess.call(['gunzip', fname + '.gz'])
 
+def get_year_and_docid(path):
+    """Get the year and the document name from the file path. This is a tad
+    dangerous since it relies on a particular directory structure, but it works
+    with how the patent directories are set up, whre each patent is directly
+    inside a year directory. If there is no year directory, the year returned
+    will be 9999."""
+    year = os.path.basename(os.path.dirname(path))
+    doc_id = os.path.basename(path)
+    if not (len(year) == 4 and year.isdigit()):
+        year = '9999'
+    return (year, doc_id)
+
 
 class FileSpec(object):
 
