@@ -1,10 +1,22 @@
-import os, errno, stat, subprocess
+import os, errno, stat, subprocess, gzip, codecs
 
 
 def read_only(filename):
     """Set permissions on filename to read only."""
     os.chmod(filename, stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
 
+def openfile(filename):
+    """First checks whether there is a gzipped version of filename, if so, it
+    returns a StreamReader instance. Otherwise, filename is a regular
+    uncompressed file and a file object is returned."""
+    # TODO: generalize this over reading and writing (or create two methods)
+    if os.path.exists(filename + '.gz'):
+        gzipfile = gzip.open(filename + '.gz', 'rb')
+        reader = codecs.getreader('utf-8')
+        return reader(gzipfile)
+    else:
+        # fallback case, possibly needed for older runs
+        return codecs.open(filename, encoding='utf-8')
 
 def ensure_path(path, verbose=False):
     """Make sure path exists."""
@@ -85,7 +97,7 @@ def uncompress(*fnames):
 def get_year_and_docid(path):
     """Get the year and the document name from the file path. This is a tad
     dangerous since it relies on a particular directory structure, but it works
-    with how the patent directories are set up, whre each patent is directly
+    with how the patent directories are set up, where each patent is directly
     inside a year directory. If there is no year directory, the year returned
     will be 9999."""
     year = os.path.basename(os.path.dirname(path))
@@ -93,6 +105,14 @@ def get_year_and_docid(path):
     if not (len(year) == 4 and year.isdigit()):
         year = '9999'
     return (year, doc_id)
+
+def get_year(path):
+    """Get the year from the path name. Returns 9999 if no obvious year was
+    found. See the comment in get_year_and_docid()."""
+    year = os.path.basename(os.path.dirname(path))
+    if not (len(year) == 4 and year.isdigit()):
+        year = '9999'
+    return year
 
 
 class FileSpec(object):
