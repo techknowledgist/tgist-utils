@@ -5,7 +5,7 @@ def read_only(filename):
     """Set permissions on filename to read only."""
     os.chmod(filename, stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
 
-def openfile(filename):
+def open_input_file(filename):
     """First checks whether there is a gzipped version of filename, if so, it
     returns a StreamReader instance. Otherwise, filename is a regular
     uncompressed file and a file object is returned."""
@@ -17,6 +17,14 @@ def openfile(filename):
     else:
         # fallback case, possibly needed for older runs
         return codecs.open(filename, encoding='utf-8')
+
+def open_output_file(fname):
+    """Return a StreamWriter instance on the gzip file object. Unlike
+    open_input_file(), there does not need to be a provision for writing
+    unzipped data."""
+    gzipfile = gzip.open(fname + '.gz', 'wb')
+    writer = codecs.getwriter('utf-8')
+    return writer(gzipfile)
 
 def ensure_path(path, verbose=False):
     """Make sure path exists."""
