@@ -291,6 +291,14 @@ class DataSet(object):
                                            time.strftime("%Y:%m:%d-%H:%M:%S"),
                                            get_git_commit(), time_elapsed))
 
+    def update_processed_count(self, n):
+        """Increment the count of files processed in the state directory."""
+        processed_filename = os.path.join(self.path, 'state', 'processed.txt')
+        files_processed = int(open(processed_filename).read().strip())
+        new_count = files_processed + n
+        self.files_processed = new_count
+        create_file(processed_filename, str(new_count))
+
     def input_matches_global_config(self):
         """This determines whether the data set matches the global pipeline configuration
         if the data set is considered to be the input to the current processing step. This
