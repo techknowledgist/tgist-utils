@@ -4,7 +4,7 @@ Various utilities for ontology creation.
 
 """
 
-import os, sys, time, shutil
+import os, sys, time, shutil, cProfile, pstats
 
 from ontology.utils.file import filename_generator, ensure_path, create_file
 from ontology.utils.git import get_git_commit
@@ -338,3 +338,51 @@ class DataSet(object):
         for e in self.pipeline_trace:
             print "     ", e[0], e[1]
         print
+
+
+
+class Profiler(object):
+
+    """Wrapper for the profiler. You can simply initialize a class instance to run
+    the profiler and print the statistics. It lets you select an arbitrary
+    function call and replace it with a version that wraps the profiler, handing
+    the profiler the function, the list of arguments, a dictionary of keyword
+    arguments and a filename to print results to. For example, take the
+    following piece of code in Classifier._create_mallet_file() in
+    step4_technologies.py:
+
+      train.add_file_to_utraining_test_file(phr_feats_file, fh, d_phr2label, stats,
+                                            use_all_chunks_p=self.use_all_chunks_p)
+
+    To run the profiler you would replace it with:
+
+      Profiler(train.add_file_to_utraining_test_file,
+               [phr_feats_file, fh, d_phr2label, stats],
+               {'use_all_chunks_p': self.use_all_chunks_p},
+               'mallet_stats.txt')
+
+    This writes profiling statistics to 'mallet_stats.txt' and prints them. You
+    would typically do this on simpler calls, for example:
+
+      Profiler(self._create_mallet_file, [], {}, 'mallet_stats.txt')
+      # self._create_mallet_file()
+
+    """
+
+    def __init__(self, cmd, args, kwargs, filename):
+        self.cmd = cmd
+        self.args = args
+        self.kwargs = kwargs
+        self.filename = filename
+        self.profile()
+
+    def profile(self):
+        cProfile.runctx('self.run()', globals(), locals(), self.filename)
+        p = pstats.Stats(self.filename)
+        p.sort_stats('cumulative').print_stats(30)
+
+    def run(self):
+        for i in range(1):
+            args = self.args
+            kwargs = self.kwargs
+            self.cmd(*args, **kwargs)
