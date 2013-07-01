@@ -139,7 +139,8 @@ class RuntimeConfig(object):
     setting in here are particular to a certain pipeline as defined for a corpus."""
     
     def __init__(self, target_path, language, pipeline_config_file):
-        self.target_path = target_path
+        self.target_path = target_path # kept here for older code
+        self.corpus = target_path
         self.language = language
         self.config_dir = os.path.join(target_path, 'config')
         self.general_config_file = os.path.join(self.config_dir, 'general.txt')
