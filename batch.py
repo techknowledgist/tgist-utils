@@ -134,9 +134,10 @@ def check_file_availability(dataset, filelist):
 
 class RuntimeConfig(object):
 
-    """Class that manages the configuration settings. This includes keeping track of the
-    language, the source directory or file, pipeline configuration settings etcetera. The
-    setting in here are particular to a certain pipeline as defined for a corpus."""
+    """Class that manages the configuration settings. This includes keeping
+    track of the language, the source directory or file, pipeline configuration
+    settings etcetera. The settings in here are particular to a certain pipeline
+    as defined for a corpus."""
     
     def __init__(self, target_path, language, pipeline_config_file):
         self.target_path = target_path # kept here for older code
