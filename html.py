@@ -5,16 +5,16 @@ only contain a title and a style sheet, the body tag's content is unlimited.
 To create a simple document all you need are the HtmlDocument class, the
 HtmlElement class, the add_style method and the add() method:
 
-   >>> doc = HtmlDocument(title='test')
-   >>> doc.add_style('.emphasized', 'font-size: 20pt', 'color: green')
-   >>> doc.add(HtmlElement(doc, tag='p', class_name='emphasized'))
-   >>> doc.print_html(open('test.html'))
+   doc = HtmlDocument(title='test')
+   doc.add_style('.emphasized', 'font-size: 20pt', 'color: green')
+   doc.add(HtmlElement(doc, tag='p', class_name='emphasized'))
+   doc.print_html(open('test.html'))
 
 This doesn't do anything interesting. The add() method returns the element
 added, to which you can add other elements, including texts using HtmlText:
 
-   >>> p = doc.add(HtmlElement(doc, tag='p', class_name='emphasized'))
-   >>> p.add(HtmlText('emphasized text'))
+   p = doc.add(HtmlElement(doc, tag='p', class_name='emphasized'))
+   p.add(HtmlText('emphasized text'))
 
 Typically, you will use one of the convenience functions on HtmlDocument:
 
@@ -35,17 +35,17 @@ object which itself understands the add_row() method.
 
 A few more examples:
 
-   >>> doc.add_header(None, 'An h2 tag without a style')
-   >>> doc.add_text('<p>raw text with <strong>tags</strong> in it</p>')
-   >>> doc.add_paragraph('large', 'A p tag with a class')
-   >>> doc.add_paragraph(None, 'A p tag without a class')
-   >>> doc.add_empty('hr')
-   >>> doc.add_link('http://127.0.0.1', 'link to localhost')
-   >>> doc.add_list(['a', 'ul', 'list', 'with', 'six', 'items'])
-   >>> table = doc.add_table(class_name='indent', padding=8)
-   >>> table.add_row(('&nbsp;',), ('term',), ('score',), ('documents',))
-   >>> table.add_row(('right', '1'), ('computer program',), ('0.67',), ('right', '16'))
-   >>> table.add_row(('right', '2'), ('computer system',), ('0.83',), ('right', '12'))
+   doc.add_header(None, 'An h2 tag without a style')
+   doc.add_text('<p>raw text with <strong>tags</strong> in it</p>')
+   doc.add_paragraph('large', 'A p tag with a class')
+   doc.add_paragraph(None, 'A p tag without a class')
+   doc.add_empty('hr')
+   doc.add_link('http://127.0.0.1', 'link to localhost')
+   doc.add_list(['a', 'ul', 'list', 'with', 'six', 'items'])
+   table = doc.add_table(class_name='indent', padding=8)
+   table.add_row(('&nbsp;',), ('term',), ('score',), ('documents',))
+   table.add_row(('right', '1'), ('computer program',), ('0.67',), ('right', '16'))
+   table.add_row(('right', '2'), ('computer system',), ('0.83',), ('right', '12'))
 
 
 SOME THINGS ON THE WISHLIST:

@@ -77,27 +77,18 @@ def show_pipelines(rconfig):
             print '  ', line
     print
 
-
 def find_input_dataset(rconfig, dataset_name):
     """Find the dataset that is input for training. Unlike the code in
-    step2_document_processing.find_input_dataset(), this function hard-codes the
-    input data type rather than referring to DOCUMENT_PROCESSING_IO. Note that
-    this particular one was only used for generating the summary files, it is
-    currently not used as input to training. This method probably only works for
-    dataset_names d3_phr_feats, d3_phr_occ and d4_doc_feats"""
-    # TODO: this is part of the find_input_dataset() mess
+    step2_document_processing.find_input_dataset(), this function takes the
+    input data type as an argument rather than using the stage name and
+    referring to DOCUMENT_PROCESSING_IO """
+    # TODO: having two ways to do this is not optimal, merge the two
     datasets = []
     for ds in get_datasets(rconfig, '--train', dataset_name):
-        full_config = ds.pipeline_trace
-        full_config.append(ds.pipeline_head)
-        # for d3_phr_feats and d3_phr_occ we do not need to apply the entire
-        # pipeline, therefore matching should not be on the entire pipeline
-        # either
+        ds_config = ds.pipeline_trace + [ds.pipeline_head]
+        ds_config_length = len(ds_config)
         pipeline = rconfig.pipeline
-        # TODO: this is now an even bigger mess
-        #if dataset_name.startswith('d3_'):
-        #    pipeline = rconfig.pipeline[:-1]
-        if full_config == pipeline:
+        if ds_config == pipeline[:ds_config_length]:
             datasets.append(ds)
     return _check_result(datasets)
 
