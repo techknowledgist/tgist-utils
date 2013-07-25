@@ -192,6 +192,16 @@ class FileData(object):
         dictionary."""
         return self.terms.keys()
 
+    def get_term_instances_dictionary(self):
+        """Returns a dictionary indexed on document offsets (sentence
+        numbers). The values are lists of TermInstances."""
+        terms = {}
+        for t in self.get_terms():
+            term = self.get_term(t)
+            for inst in term.term_instances:
+                terms.setdefault(inst.doc_loc, []).append(inst)
+        return terms
+
     def _init_collect_lines_from_tag_file(self):
         self.tags = []
         with open_input_file(self.tag_file) as fh:
@@ -288,6 +298,12 @@ class TermInstance(object):
         string = "<TermInstance %s %s %d-%d '%s'>" \
             % (self.id, self.doc_loc, self.tok1, self.tok2, self.context_token())
         return string.encode("UTF-8")
+
+    def __cmp__(self, other):
+        comparison1 = cmp(self.doc_loc, other.doc_loc)
+        if comparison1 != 0:
+            return comparison1
+        return cmp(self.tok1, other.tok1)
 
     def add_context(self, context):
         self.context = context
