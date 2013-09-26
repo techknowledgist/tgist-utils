@@ -121,6 +121,24 @@ def check_file_availability(dataset, filelist):
         sys.exit("WARNING: %d/%d files in %s have not been processed yet\n         %s" %
                  (not_in_dataset, total, os.path.basename(filelist), dataset))
 
+def generate_doc_feats(s_phr_feats, doc_id, year):
+    """Given a file handle to a file with phase features, generate and return a
+    mapping from phrases to the document features for the phrase. The document
+    features include the term as the first element and an identifier with year,
+    document and term as the second element."""
+    d_doc_feats = {}
+    for line in s_phr_feats:
+        l_feat = line.strip("\n").split("\t")
+        # key is the chunk/phrase itself
+        key, feats = l_feat[2], l_feat[3:]
+        d_doc_feats.setdefault(key, set()).update(set(feats))
+    for key, value in d_doc_feats.items():
+        symbol_key = key.replace(" ", "_")
+        uid = year + "|" + doc_id + "|" + symbol_key
+        features = [key, uid]
+        features.extend(sorted(list(value)))
+        d_doc_feats[key] = features
+    return d_doc_feats
 
 
 class RuntimeConfig(object):
