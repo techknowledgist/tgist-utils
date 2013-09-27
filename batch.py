@@ -149,10 +149,12 @@ class RuntimeConfig(object):
     settings etcetera. The settings in here are particular to a certain pipeline
     as defined for a corpus."""
     
-    def __init__(self, corpus_path, model_path, language, pipeline_config_file):
+    def __init__(self, corpus_path, model_path, classification_path,
+                 language, pipeline_config_file):
         self.target_path = corpus_path # kept here for older code
         self.corpus = corpus_path
         self.model = model_path
+        self.classification = classification_path
         self.language = language
         self.config_dir = os.path.join(corpus_path, 'config')
         self.general_config_file = os.path.join(self.config_dir, 'general.txt')
@@ -193,9 +195,10 @@ class RuntimeConfig(object):
         return {}
 
     def pp(self):
-        print "\n<RuntimeConfig"
-        print "    corpus = '%s'" % (self.corpus)
-        print "    model  = '%s'>" % (self.model)
+        print "\n<RuntimeConfig>"
+        print "   corpus = %s" % (self.corpus)
+        print "   model = %s" % (self.model)
+        print "   classification = %s" % (self.classification)
         print "\n   General Corpus Config Settings"
         for k,v in self.general.items():
             print "      %s ==> %s" % (k,v)
@@ -205,7 +208,7 @@ class RuntimeConfig(object):
         print "\n   Model Config Settings"
         print "      model ==> %s" % self.model
         print
-        
+
 
 class DataSet(object):
 
