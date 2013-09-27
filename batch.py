@@ -50,6 +50,7 @@ def get_datasets(config, stage, input_name):
 
 def show_datasets(rconfig, data_types, verbose=False):
     """Print all datasets in the data directory."""
+    print "<Corpus on '%s'>" % rconfig.corpus
     for dataset_type in data_types:
         if verbose:
             print "\n===", dataset_type, "===\n"
