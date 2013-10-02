@@ -58,7 +58,7 @@ def show_datasets(rconfig, data_types, verbose=False):
         datasets1 = [ds for ds in os.listdir(path) if ds.isdigit()]
         datasets2 = [DataSet(None, dataset_type, rconfig, ds) for ds in datasets1]
         for ds in datasets2:
-            print ds
+            print '  ', ds
             if verbose:
                 for e in ds.pipeline_trace:
                     print "   ", e[0], e[1]
