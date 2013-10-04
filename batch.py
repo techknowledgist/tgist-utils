@@ -251,7 +251,7 @@ class DataSet(object):
 
     def __str__(self):
         return "<DataSet %s version_id=%s files=%d>" % \
-            (self.type, self.version_id, self.files_processed)
+            (self.type[:6], self.version_id, self.files_processed)
     
     def initialize_on_disk(self):
         """All that is guaranteed to exist is a directory like data/patents/en/d1_txt, but
