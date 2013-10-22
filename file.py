@@ -10,13 +10,18 @@ def open_input_file(filename):
     returns a StreamReader instance. Otherwise, filename is a regular
     uncompressed file and a file object is returned."""
     # TODO: generalize this over reading and writing (or create two methods)
+    print "file.py: filename: %s" % filename
     if os.path.exists(filename + '.gz'):
+        print "file.py: in if, filename: %s" % (filename + '.gz')
         gzipfile = gzip.open(filename + '.gz', 'rb')
         reader = codecs.getreader('utf-8')
         return reader(gzipfile)
-    else:
+    elif os.path.exists(filename):
         # fallback case, possibly needed for older runs
         return codecs.open(filename, encoding='utf-8')
+    else: 
+        print "[file.py open_input_file]file does not exist: %s" % filename
+        
 
 def open_output_file(fname):
     """Return a StreamWriter instance on the gzip file object. Unlike
