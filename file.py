@@ -23,13 +23,15 @@ def open_input_file(filename):
         print "[file.py open_input_file]file does not exist: %s" % filename
         
 
-def open_output_file(fname):
-    """Return a StreamWriter instance on the gzip file object. Unlike
-    open_input_file(), there does not need to be a provision for writing
-    unzipped data."""
-    gzipfile = gzip.open(fname + '.gz', 'wb')
-    writer = codecs.getwriter('utf-8')
-    return writer(gzipfile)
+def open_output_file(fname, compress=True):
+    """Return a StreamWriter instance on the gzip file object if compress is
+    True, otherwise return a file object."""
+    if compress:
+        gzipfile = gzip.open(fname + '.gz', 'wb')
+        writer = codecs.getwriter('utf-8')
+        return writer(gzipfile)
+    else:
+        return codecs.open(fname, 'w', encoding='utf-8')
 
 def ensure_path(path, verbose=False):
     """Make sure path exists."""

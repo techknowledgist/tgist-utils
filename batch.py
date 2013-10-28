@@ -50,6 +50,7 @@ def get_datasets(config, stage, input_name):
 
 def show_datasets(rconfig, data_types, verbose=False):
     """Print all datasets in the data directory."""
+    print "<Corpus on '%s'>" % rconfig.corpus
     for dataset_type in data_types:
         if verbose:
             print "\n===", dataset_type, "===\n"
@@ -57,7 +58,7 @@ def show_datasets(rconfig, data_types, verbose=False):
         datasets1 = [ds for ds in os.listdir(path) if ds.isdigit()]
         datasets2 = [DataSet(None, dataset_type, rconfig, ds) for ds in datasets1]
         for ds in datasets2:
-            print ds
+            print '  ', ds
             if verbose:
                 for e in ds.pipeline_trace:
                     print "   ", e[0], e[1]
@@ -121,6 +122,24 @@ def check_file_availability(dataset, filelist):
         sys.exit("WARNING: %d/%d files in %s have not been processed yet\n         %s" %
                  (not_in_dataset, total, os.path.basename(filelist), dataset))
 
+def generate_doc_feats(s_phr_feats, doc_id, year):
+    """Given a file handle to a file with phase features, generate and return a
+    mapping from phrases to the document features for the phrase. The document
+    features include the term as the first element and an identifier with year,
+    document and term as the second element."""
+    d_doc_feats = {}
+    for line in s_phr_feats:
+        l_feat = line.strip("\n").split("\t")
+        # key is the chunk/phrase itself
+        key, feats = l_feat[2], l_feat[3:]
+        d_doc_feats.setdefault(key, set()).update(set(feats))
+    for key, value in d_doc_feats.items():
+        symbol_key = key.replace(" ", "_")
+        uid = year + "|" + doc_id + "|" + symbol_key
+        features = [key, uid]
+        features.extend(sorted(list(value)))
+        d_doc_feats[key] = features
+    return d_doc_feats
 
 
 class RuntimeConfig(object):
@@ -130,11 +149,14 @@ class RuntimeConfig(object):
     settings etcetera. The settings in here are particular to a certain pipeline
     as defined for a corpus."""
     
-    def __init__(self, target_path, language, pipeline_config_file):
-        self.target_path = target_path # kept here for older code
-        self.corpus = target_path
+    def __init__(self, corpus_path, model_path, classification_path,
+                 language, pipeline_config_file):
+        self.target_path = corpus_path # kept here for older code
+        self.corpus = corpus_path
+        self.model = model_path
+        self.classification = classification_path
         self.language = language
-        self.config_dir = os.path.join(target_path, 'config')
+        self.config_dir = os.path.join(corpus_path, 'config')
         self.general_config_file = os.path.join(self.config_dir, 'general.txt')
         self.pipeline_config_file = os.path.join(self.config_dir, pipeline_config_file)
         self.filenames = os.path.join(self.config_dir, 'files.txt')
@@ -173,15 +195,20 @@ class RuntimeConfig(object):
         return {}
 
     def pp(self):
-        print "\n<GlobalConfig on '%s'>" % (self.target_path)
-        print "\n   General Config Settings"
+        print "\n<RuntimeConfig>"
+        print "   corpus = %s" % (self.corpus)
+        print "   model = %s" % (self.model)
+        print "   classification = %s" % (self.classification)
+        print "\n   General Corpus Config Settings"
         for k,v in self.general.items():
             print "      %s ==> %s" % (k,v)
         print "\n   Pipeline Config Settings"
         for k,v in self.pipeline:
             print "      %s ==> %s" % (k,v)
+        print "\n   Model Config Settings"
+        print "      model ==> %s" % self.model
         print
-        
+
 
 class DataSet(object):
 
@@ -224,7 +251,7 @@ class DataSet(object):
 
     def __str__(self):
         return "<DataSet %s version_id=%s files=%d>" % \
-            (self.type, self.version_id, self.files_processed)
+            (self.type[:6], self.version_id, self.files_processed)
     
     def initialize_on_disk(self):
         """All that is guaranteed to exist is a directory like data/patents/en/d1_txt, but
