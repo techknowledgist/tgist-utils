@@ -175,7 +175,7 @@ class FileData(object):
     """An instance contains a terms dictionary with term information from the
     phr_feats file, amended with a context taken from the tags file. Each term
     is an instance of Term and contains a list of TermInstances. Each
-    TermInstance provodes access to the features and the context of the
+    TermInstance provides access to the features and the context of the
     instance."""
 
     def __init__(self, tag_file, feat_file, verbose=False):
@@ -188,6 +188,19 @@ class FileData(object):
 
     def __str__(self):
         return "<FileData\n   %s\n   %s>" % (self.tag_file, self.feat_file)
+
+    def get_title(self):
+        for section, line in self.tags:
+            if section == 'FH_TITLE:':
+                return ' '.join(line)
+        return ''
+
+    def get_abstract(self):
+        abstract = []
+        for section, line in self.tags:
+            if section == 'FH_ABSTRACT:':
+                abstract.append(' '.join(line))
+        return ' '.join(abstract)
 
     def get_term(self, term):
         """Return the Term instance for term or None if term is not in the
