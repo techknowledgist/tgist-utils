@@ -41,7 +41,7 @@ A few more examples:
    doc.add_paragraph(None, 'A p tag without a class')
    doc.add_empty('hr')
    doc.add_link('http://127.0.0.1', 'link to localhost')
-   doc.add_list(['a', 'ul', 'list', 'with', 'six', 'items'])
+   doc.add_list('ul', ['a', 'ul', 'list', 'with', 'six', 'items'])
    table = doc.add_table(class_name='indent', padding=8)
    table.add_row(('&nbsp;',), ('term',), ('score',), ('documents',))
    table.add_row(('right', '1'), ('computer program',), ('0.67',), ('right', '16'))
@@ -123,10 +123,11 @@ class HtmlDocument(HtmlElement):
         self.children.append(table)
         return table
 
-    def add_list(self, items):
-        ul = doc.add(HtmlElement(doc, 'ul'))
+    def add_list(self, list_type, items):
+        # list_type is 'ol' or 'ul'
+        l = doc.add(HtmlElement(doc, list_type))
         for item in items:
-            ul.add(HtmlSimpleElement('li', None, item))
+            l.add(HtmlSimpleElement('li', None, item))
 
     def add_numbered_list(self, items):
         ul = doc.add(HtmlElement(doc, 'ul'))
@@ -242,12 +243,14 @@ if __name__ == '__main__':
     doc.add_paragraph(None, "A p tag without a class")
     doc.add_empty('hr')
     doc.add_link("http://127.0.0.1", "link to local host")
-    doc.add_paragraph(None, "time for a list")
-    doc.add_list(['a', 'ul', 'list', 'with', 'six', 'items'])
+    doc.add_paragraph(None, "A numbered list:")
+    doc.add_list('ol', ['with', 'three', 'items'])
+    doc.add_paragraph(None, "A bullet list:")
+    doc.add_list('ul', ['only', 'two'])
 
     doc.add_paragraph(None, "time for a table")
     table = doc.add_table(class_name='indent', padding=8)
-    table.add_row(('&nbsp;',), ('term',), ('score',), ('documents',), ('instances',))
+    table.add_row(('&nbsp;',), ('term',), ('t_score',), ('documents',), ('instances',))
     table.add_row(('right', '1'), ('computer program',), ('0.67',), ('right', '16'), ('right', '324'))
     table.add_row(('right', '2'), ('computer system',), ('0.83',), ('right', '12'), ('right', '215'))
 
