@@ -307,7 +307,8 @@ class TermInstance(object):
         self.feats = term_data[2]
         doc_loc = self.feats.get('doc_loc')
         sent_loc = self.feats.get('sent_loc')
-        doc_loc = doc_loc[4:]
+        if doc_loc.startswith('sent'):
+            doc_loc = doc_loc[4:]
         tok1, tok2 = sent_loc.split('-')
         self.doc_loc = int(doc_loc)
         self.sent_loc = (int(tok1), int(tok2))
