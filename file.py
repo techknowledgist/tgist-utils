@@ -22,7 +22,6 @@ def open_input_file(filename):
     else: 
         print "[file.py open_input_file]file does not exist: %s" % filename
         
-
 def open_output_file(fname, compress=True):
     """Return a StreamWriter instance on the gzip file object if compress is
     True, otherwise return a file object."""
