@@ -26,7 +26,10 @@ def open_output_file(fname, compress=True):
     """Return a StreamWriter instance on the gzip file object if compress is
     True, otherwise return a file object."""
     if compress:
-        gzipfile = gzip.open(fname + '.gz', 'wb')
+        if fname.endswith('.gz'):
+            gzipfile = gzip.open(fname, 'wb')
+        else:
+            gzipfile = gzip.open(fname + '.gz', 'wb')
         writer = codecs.getwriter('utf-8')
         return writer(gzipfile)
     else:
