@@ -101,6 +101,7 @@ def compress(*fnames):
     exists and it will not attempt to compress."""
     for fname in fnames:
         if not os.path.exists(fname + '.gz'):
+            print "Compressing", fname
             subprocess.call(['gzip', fname])
 
 def uncompress(*fnames):
