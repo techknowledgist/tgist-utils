@@ -20,7 +20,7 @@ def open_input_file(filename):
         # fallback case, possibly needed for older runs
         return codecs.open(filename, encoding='utf-8')
     else: 
-        print "[file.py open_input_file]file does not exist: %s" % filename
+        print "[file.py open_input_file] file does not exist: %s" % filename
         
 def open_output_file(fname, compress=True):
     """Return a StreamWriter instance on the gzip file object if compress is
@@ -101,7 +101,6 @@ def compress(*fnames):
     exists and it will not attempt to compress."""
     for fname in fnames:
         if not os.path.exists(fname + '.gz'):
-            print "Compressing", fname
             subprocess.call(['gzip', fname])
 
 def uncompress(*fnames):
