@@ -167,6 +167,9 @@ class RuntimeConfig(object):
 
     def read_general_config(self):
         for line in open(self.general_config_file):
+            if line.startswith('#'): continue
+            if line.startswith('$'): continue
+            if not line.strip(): continue
             (var, val) = line.strip().split('=')
             self.general[var.strip()] = val.strip()
             if var.strip() == 'language':
