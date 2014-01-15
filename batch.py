@@ -134,6 +134,10 @@ def generate_doc_feats(s_phr_feats, doc_id, year):
         key, feats = l_feat[2], l_feat[3:]
         d_doc_feats.setdefault(key, set()).update(set(feats))
     for key, value in d_doc_feats.items():
+        # the feature values sometimes have spaces in them, should be caught
+        # before this but replace them with underscores before they go into the
+        # mallet file (which is space separated rather than tab separatedq
+        value = [v.replace(' ', '_') for v in value]
         symbol_key = key.replace(" ", "_")
         uid = year + "|" + doc_id + "|" + symbol_key
         features = [key, uid]
