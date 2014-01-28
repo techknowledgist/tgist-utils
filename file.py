@@ -312,6 +312,7 @@ class TermInstance(object):
         if doc_loc.startswith('sent'):
             doc_loc = doc_loc[4:]
         tok1, tok2 = sent_loc.split('-')
+        self.sec_loc = self.feats.get('section_loc')
         self.doc_loc = int(doc_loc)
         self.sent_loc = (int(tok1), int(tok2))
         self.tok1 = int(tok1)
@@ -346,6 +347,15 @@ class TermInstance(object):
     def context_right(self):
         return ' '.join(self.context[1][self.tok2:])
 
+    def print_as_tabbed_line(self, fh):
+        fh.write("\t%s\t%s\t%s\t%s\t%s\t%s\n"
+                 % (self.year, self.id, self.feats.get('section_loc'),
+                    self.context_left(), self.context_token(), self.context_right()))
+
+    def print_as_html(self, fh):
+        fh.write("<file>%s -- %s</file><br/>\n%s <np>%s</np> %s"
+                 % (self.id, self.sec_loc,
+                    self.context_left(), self.context_token(), self.context_right()))
 
 
 def parse_feats_line(line):
