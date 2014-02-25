@@ -1,4 +1,4 @@
-import os, errno, stat, subprocess, gzip, codecs
+import os, sys, errno, stat, subprocess, gzip, codecs
 
 
 def read_only(filename):
@@ -347,6 +347,9 @@ class TermInstance(object):
     def context_right(self):
         return ' '.join(self.context[1][self.tok2:])
 
+    def check_feature(self, feat, val):
+        return self.feats.get(feat) == val
+        
     def print_as_tabbed_line(self, fh):
         fh.write("\t%s\t%s\t%s\t%s\t%s\t%s\n"
                  % (self.year, self.id, self.feats.get('section_loc'),
@@ -367,3 +370,26 @@ def parse_feats_line(line):
     feats = feats.split("\t")
     feats = dict((k,v) for (k,v) in [f.split('=', 1) for f in feats])
     return (id, year, term, feats)
+
+
+if __name__ == '__main__':
+
+    # all you need to get the data is the corpus and the relative path
+    corpus = '/home/j/corpuswork/fuse/FUSEData/corpora/ln-us-sample-500'
+    filename = '2000/US6031898A.xml'
+
+    # get the file data object
+    fd = FileData(os.path.join(corpus, 'data', 'd2_tag', '01', 'files', filename),
+                  os.path.join(corpus, 'data', 'd3_phr_feats', '01', 'files', filename))
+
+    # this prints the first five terms with their instances
+    fd.print_terms()
+
+    # now let's look into one of them
+    term = fd.get_term('phone companies')
+    print "\n", term
+    for inst in term.term_instances:
+        # only get those instances where we have prev_V=permitted
+        if inst.check_feature('prev_V', 'permitted'):
+            inst.print_as_html(sys.stdout)
+            print
