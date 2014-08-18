@@ -4,7 +4,7 @@ Various utilities for ontology creation.
 
 """
 
-import os, sys, time, shutil, cProfile, pstats
+import os, sys, time, glob, shutil, cProfile, pstats
 
 from ontology.utils.file import filename_generator, ensure_path, create_file
 from ontology.utils.git import get_git_commit
@@ -63,6 +63,33 @@ def show_datasets(rconfig, data_types, verbose=False):
                 for e in ds.pipeline_trace:
                     print "   ", e[0], e[1]
                 print "   ", ds.pipeline_head[0], ds.pipeline_head[1]
+
+def show_processing_time(rconfig, data_types):
+    """Show processing time for all available stages. An empty line with no time
+    typically means that processing is in progress."""
+    print "<Corpus on '%s'>" % rconfig.corpus
+    for dataset_type in data_types:
+        path = os.path.join(rconfig.corpus, 'data', dataset_type, '*', 'state')
+        state_dirs = glob.glob(path)
+        for dir in state_dirs:
+            processed = open(os.path.join(dir, 'processed.txt')).read().strip()
+            times  = open(os.path.join(dir, 'processing-history.txt')).read().strip()
+            for time in times.split("\n"):
+                parsed_times = parse_processing_time_line(time)
+                if parsed_times is not None:
+                    print '  ', dir[-8:-6], ' ', parsed_times
+                else:
+                    print '  ', dir[-8:-6]
+
+def parse_processing_time_line(line):
+    try:
+        (stage, count, time, git, seconds) = line.split("\t")
+        count = float(count)
+        seconds = float(seconds)
+        return "%s\t%d docs in %d secs (%.2f seconds/doc)" \
+               % (stage, count, seconds, seconds / count)
+    except ValueError:
+        return None
 
 def show_pipelines(rconfig):
     path = os.path.join(rconfig.target_path, 'config')
