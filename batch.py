@@ -195,7 +195,7 @@ class RuntimeConfig(object):
         self.general = {}
         self.pipeline = []
         if corpus_path is not None:
-            os.path.join(corpus_path, 'config')
+            self.config_dir = os.path.join(corpus_path, 'config')
             self.general_config_file = os.path.join(self.config_dir, 'general.txt')
             self.pipeline_config_file = os.path.join(self.config_dir, pipeline_config_file)
             self.filenames = os.path.join(self.config_dir, 'files.txt')
