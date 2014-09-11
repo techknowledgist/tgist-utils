@@ -187,14 +187,20 @@ class RuntimeConfig(object):
         self.model = model_path
         self.classification = classification_path
         self.language = language
-        self.config_dir = os.path.join(corpus_path, 'config')
-        self.general_config_file = os.path.join(self.config_dir, 'general.txt')
-        self.pipeline_config_file = os.path.join(self.config_dir, pipeline_config_file)
-        self.filenames = os.path.join(self.config_dir, 'files.txt')
+        # the user can specify a file list and no corpus, allow for this here
+        self.config_dir = None
+        self.general_config_file = None
+        self.pipeline_config_file = None
+        self.filenames = None
         self.general = {}
         self.pipeline = []
-        self.read_general_config()
-        self.read_pipeline_config()
+        if corpus_path is not None:
+            os.path.join(corpus_path, 'config')
+            self.general_config_file = os.path.join(self.config_dir, 'general.txt')
+            self.pipeline_config_file = os.path.join(self.config_dir, pipeline_config_file)
+            self.filenames = os.path.join(self.config_dir, 'files.txt')
+            self.read_general_config()
+            self.read_pipeline_config()
 
     def read_general_config(self):
         for line in open(self.general_config_file):
