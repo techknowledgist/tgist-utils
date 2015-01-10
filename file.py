@@ -97,11 +97,11 @@ def filename_generator(path, filelist):
 
 def compress(*fnames):
     """Compress all filenames fname in *fnames using gzip. Checks first if the
-    filename exists, it it doesn't it will assume that a file fname.gz already
-    exists and it will not attempt to compress."""
+    file was already compressed."""
     for fname in fnames:
-        if not os.path.exists(fname + '.gz'):
-            subprocess.call(['gzip', fname])
+        if fname.endswith(".gz"): continue
+        if os.path.exists(fname + '.gz'): continue
+        subprocess.call(['gzip', fname])
 
 def uncompress(*fnames):
     """Uncompress all files fname in *fnames using gunzip. The fname argument
