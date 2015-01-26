@@ -5,6 +5,10 @@ def read_only(filename):
     """Set permissions on filename to read only."""
     os.chmod(filename, stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
 
+def make_writable(filename):
+    """Make filename writeable by owner."""
+    os.chmod(filename, stat.S_IWRITE | stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
+
 def open_input_file(filename):
     """First checks whether there is a gzipped version of filename, if so, it
     returns a StreamReader instance. Otherwise, filename is a regular
