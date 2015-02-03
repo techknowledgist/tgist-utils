@@ -192,7 +192,10 @@ class RuntimeConfig(object):
         self.general_config_file = None
         self.pipeline_config_file = None
         self.filenames = None
-        self.general = {}
+        # The general settings are filled in by read_general_config() below, but
+        # older corpora do not have the datasource property, so set this to 'ln'
+        # since all older corpora are LexisNexis patent corpora.
+        self.general = { 'datasource': 'ln' }
         self.pipeline = []
         if corpus_path is not None:
             self.config_dir = os.path.join(corpus_path, 'config')
@@ -201,6 +204,9 @@ class RuntimeConfig(object):
             self.filenames = os.path.join(self.config_dir, 'files.txt')
             self.read_general_config()
             self.read_pipeline_config()
+
+    def __getattr__(self, name):
+        return self.general.get(name)
 
     def read_general_config(self):
         for line in open(self.general_config_file):
