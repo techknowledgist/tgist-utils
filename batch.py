@@ -179,14 +179,15 @@ class RuntimeConfig(object):
     track of the language, the source directory or file, pipeline configuration
     settings etcetera. The settings in here are particular to a certain pipeline
     as defined for a corpus."""
-    
+
     def __init__(self, corpus_path, model_path, classification_path,
-                 language, pipeline_config_file):
+                 language, datasource, pipeline_config_file):
         self.target_path = corpus_path # kept here for older code
         self.corpus = corpus_path
         self.model = model_path
         self.classification = classification_path
         self.language = language
+        self.datasource = datasource
         # the user can specify a file list and no corpus, allow for this here
         self.config_dir = None
         self.general_config_file = None
