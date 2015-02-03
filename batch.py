@@ -218,6 +218,8 @@ class RuntimeConfig(object):
             self.general[var.strip()] = val.strip()
             if var.strip() == 'language':
                 self.language = val.strip()
+            if var.strip() == 'datasource':
+                self.datasource = val.strip()
 
     def read_pipeline_config(self):
         self.pipeline = read_pipeline_config(self.pipeline_config_file)
