@@ -6,7 +6,7 @@ def read_only(filename):
     os.chmod(filename, stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
 
 def make_writable(filename):
-    """Make filename writeable by owner."""
+    """Make filename writable by owner."""
     os.chmod(filename, stat.S_IWRITE | stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
 
 def open_input_file(filename):
