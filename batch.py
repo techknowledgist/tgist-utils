@@ -6,7 +6,7 @@ Various utilities for ontology creation.
 
 import os, sys, time, glob, shutil, cProfile, pstats
 
-from file import filename_generator, ensure_path, create_file
+from path import filename_generator, ensure_path, create_file
 from git import get_git_commit
 
 
