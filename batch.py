@@ -6,8 +6,8 @@ Various utilities for ontology creation.
 
 import os, sys, time, glob, shutil, cProfile, pstats
 
-from ontology.utils.file import filename_generator, ensure_path, create_file
-from ontology.utils.git import get_git_commit
+from file import filename_generator, ensure_path, create_file
+from git import get_git_commit
 
 
 def read_pipeline_config(pipeline_file):
